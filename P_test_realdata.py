@@ -198,7 +198,7 @@ UTSR = np.array([[ub2_s09,ub2_s17],[ub17_s09,ub17_s17],[ub23_s09,ub23_s17],[ub30
 """ '''N-parameter /n #defintion /n #source upperbound /n #source lowerbound (if source is identical) --> #source"""
 
 
-''' N export due erosion after fire(mg/m^2/yr) '''
+''' Soil export due erosion after fire(mg/m^2/yr) '''
 #IFE = inside the fire perimeter 
 #OFE = outside the fire perimeter
 #https://www.sciencedirect.com/science/article/pii/S001282521100002X
@@ -235,7 +235,7 @@ N_rain_rate_H = N_rain_rate_NH4_H + N_rain_rate_NO3_H
 #source:
 #note : the upperbound and the lowerbound were calculated in the program rain_calc.py...
 # ...which can be found in the GITHUB repository https://github.com/pshankinclarke/StationFire
-rainfall_rate_M = 5741643324.8063001633/ Area_Passadena 
+rainfall_rate_M = 676.0237095664147 
 
 '''Rate rainfall (mg/m^2/year)'''
 n_rate_final_L = rainfall_rate_M * N_rain_rate_L 
@@ -368,13 +368,14 @@ def relative_N(List1,List2,labels_list):
     else:
        return  print('for site {} the nitrogen increased over an eight year period frin {} to {}'.format(labels_list,'summer','summer'))
 
-def plot(t,n1,n2,titles,Final_soilweights):
+def plot(t,n1,n2,titles,ULB,Final_soilweights,Final_soilweightW):
         plt.plot(t,n1,'b-',linewidth=2,label='k=N_burn_max')
         plt.plot(t,n2,'b--',linewidth=2,label='k=N_burn_min')
         plt.plot(8,Final_soilweights,'ro')
+        plt.plot(7,Final_soilweightW,'bo')
         
 #        for elem in titles:
-        plt.title(titles)
+        plt.title('{} for site {}'.format(ULB,titles))
 #        plt.xlabel('time')
 #        plt.ylabel('N/m^2')
         plt.show()
@@ -433,9 +434,6 @@ def main():
   
     generate_barplot(IBS,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
 
-    #Calculate upper and lower bounds :
-    No_burn_min =  N_dep_L + n_rate_final_L + + nf_fixation_L + LBEO
-    No_burn_max =  N_dep_H + n_rate_final_H + + nf_fixation_H + UBEO
 
     for i in range(len(IFBS_labels)):
         call = relative_N(IBS[i],FBS[i],IFBS_labels[i])
@@ -450,20 +448,25 @@ def main():
      
         Intial_weightpercent = IBS[i]
         Final_weightpercent_summer = FBS[i]
-        #Final_weightpercent_winter = FBSW[i]
+        Final_weightpercent_winter = FBSW[i]
 
 
         #intial conditions 
-        Intial_soilweight = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent
+        Intial_soilweightU = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_UB
+        
+        print((density_soil * depth_sampled * area_sampled ) * Intial_weightpercent)
+        Intial_soilweightL = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_LB
+
         
         #final conditions
         Final_soilweightS =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_summer
-    #    Final_soilweightW =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_winter
+        Final_soilweightW =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_winter
         
         
         #times points 
         t = np.linspace(0,8)
         
+        #Calculate upper and lower bounds :
         Nf_burn_min = N_dep_L + n_rate_final_L + + nf_fixation_L + nf_erosion_L
         Nf_burn_max = N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H
         
@@ -471,18 +474,21 @@ def main():
       
     
         k = Nf_burn_max
-        n1 = odeint(model_inside,Intial_soilweight,t,args=(k,))
+        n1 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
         
         k = Nf_burn_min
-        n2 = odeint(model_inside,Intial_soilweight,t,args=(k,))
+        n2 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
         
-        model_plots = plot(t,n1,n2,IFBS_labels[i],Final_soilweightS)
-        #
-        ##k = No_burn_max
-        ##n3 = odeint(model_outside,ba_b1_s17,t,args=(k,))
-        ##
-        ##k = No_burn_min
-        ##n4 = odeint(model_outside,ba_b1_s17,t,args=(k,))
+        model_plots = plot(t,n1,n2,IFBS_labels[i],'upperbound',Final_soilweightS,Final_soilweightW)
+        
+        k = Nf_burn_max
+        n3 = odeint(model_outside,Intial_soilweightL,t,args=(k,))
+        
+        k = Nf_burn_min
+        n4 = odeint(model_outside,Intial_soilweightL,t,args=(k,))
+        
+        model_plots = plot(t,n1,n2,IFBS_labels[i],'lowerbound',Final_soilweightS,Final_soilweightW)
+
     
     #    call = plot(t,n1,n2,Final_soilweightS)
     #    plt.plot(7,Final_soilweightW,'ro')
