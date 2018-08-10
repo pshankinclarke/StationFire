@@ -233,8 +233,9 @@ N_rain_rate_H = N_rain_rate_NH4_H + N_rain_rate_NO3_H
 
 ## Mean amount of rainfall (liters/m^2/year)
 #source:
-#note : the upperbound and the lowerbound were calculated in the program rain_calc.py...
+#note : the upperbound is calculated in the program rain_calc.py...
 # ...which can be found in the GITHUB repository https://github.com/pshankinclarke/StationFire
+# LOWER BOUND FROM https://www.usclimatedata.com/climate/palmdale/california/united-states/usca0829 from 1981-2010 MAYBE NEED BETTER DATA
 rainfall_rate_H = 676.0237095664147 
 rainfall_rate_L = 187.96
 
