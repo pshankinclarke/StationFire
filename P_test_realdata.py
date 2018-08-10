@@ -469,8 +469,8 @@ def main():
         t = np.linspace(0,8)
         
         #Calculate upper and lower bounds :
-        Nf_burn_min = N_dep_L + n_rate_final_L + + nf_fixation_L + nf_erosion_L
-        Nf_burn_max = N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H
+        Nf_burn_min = N_dep_L + n_rate_final_L + + nf_fixation_L + nf_erosion_L  #!!! + + !!!!!
+        Nf_burn_max = N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H  #!!! + + !!!!!
         
         ##solve the ode 
       
