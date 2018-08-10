@@ -235,11 +235,12 @@ N_rain_rate_H = N_rain_rate_NH4_H + N_rain_rate_NO3_H
 #source:
 #note : the upperbound and the lowerbound were calculated in the program rain_calc.py...
 # ...which can be found in the GITHUB repository https://github.com/pshankinclarke/StationFire
-rainfall_rate_M = 676.0237095664147 
+rainfall_rate_H = 676.0237095664147 
+rainfall_rate_L = 187.96
 
 '''Rate rainfall (mg/m^2/year)'''
-n_rate_final_L = rainfall_rate_M * N_rain_rate_L 
-n_rate_final_H = rainfall_rate_M  * N_rain_rate_H 
+n_rate_final_L = rainfall_rate_L * N_rain_rate_L 
+n_rate_final_H = rainfall_rate_H  * N_rain_rate_H 
 
 '''Rate nitrogen fixation after fire(mg/m^2/year)'''
 #source : Ellis and Kummerow, 1989; Poth, 1982
