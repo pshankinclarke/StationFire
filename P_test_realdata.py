@@ -566,9 +566,17 @@ def main():
         array_N_input = np.linspace(N_input_H,N_input_L,num = 5)
         IFBS_label = IFBS_labels[i]
         combinations,flabs = comb(array_N_input,array_N_output,IFBS_label)
-#        print(flabs)
-#        print('went thru call')
         call = iterate_parameters(combinations,t,Final_soilweightS,Intial_soilweightU,flabs)
+        
+        k = Nf_burn_max
+        n1 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
+        k = Nf_burn_min
+        n2 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
+                
+        model_plots = plot(t,n1,n2,IFBS_labels[i],'upperbound',Final_soilweightS)
+                    
+        
+        model_plots = plot(t,n1,n2,IFBS_labels[i],'lowerbound',Final_soilweightS)
 
 if  __name__ == "__main__":
     main()
