@@ -186,6 +186,8 @@ IACB_labels = np.array([1,26,29])
 
 
 
+
+
 ##Comparision_Data:
 
 #Time-Scale regeneration data burned sites 
@@ -197,7 +199,6 @@ UTSR = np.array([[ub2_s09,ub2_s17],[ub17_s09,ub17_s17],[ub23_s09,ub23_s17],[ub30
 
 """N-parameters"""
 """ '''N-parameter /n #defintion /n #source upperbound /n #source lowerbound (if source is identical) --> #source"""
-
 
 ''' Soil export due erosion after fire(mg/m^2/yr) '''
 #IFE = inside the fire perimeter 
@@ -278,23 +279,7 @@ Fix_values_NO3_f = np.array([8.28,17.59,.17,.37])
 Sed_values_NO3_c = np.array([.94,.05,.02])
 Sed_values_NO3_f = np.array([12.72,.32,1.15])
 
-
-
-#soil export due to erosion after fire(mg/m^2/yr)
-#nf_erosion_L = -(.0005 * 100000 * FBS[1]/100)
-#nf_erosion_H = -(107 * 100000 * FBS[1]/100)
-
-
-##diff_N_dep = N_dep_H - N_dep_L + 1
-##array_N_dep = list(np.linspace(N_dep_L,N_dep_H,num = round(10)))
-##
-##diff_N_rain = n_rate_final_H - n_rate_final_L + 1
-##array_N_rain = np.linspace(n_rate_final_L,n_rate_final_H,num = round(10))
-##
-##diff_n_fixation = n_fixation_H - n_fixation_L + 1
-##array_n_fixation = list(np.linspace(n_fixation_L, n_fixation_H,num = round(10)))
-
-
+"""Functions"""
 
 
 def most_common(List):
@@ -317,44 +302,36 @@ def most_common(List):
   # pick the highest-count/earliest item
   return max(groups, key=_auxfun)[0]
 
+
 def plot_histogram(List1):
     '''Plots  histogram ''' 
     List1_hist = np.histogram(List1)
     plt.hist(List1_hist, bins='auto')
     
+
 def generate_barplot(Array1,Array2,Array3,Array4,title,xlabel,ylabel,label_list,labelA1,labelA2,labelA3,labelA4):
-    
+    '''Generates barplot'''
     #data to plot
     n_groups = 18
-
     #create plot
     fig, ax = plt.subplots()
     index = np.arange(n_groups)
-    
     if Array3 != 'n/a':
         bar_width = 0.2
     elif Array4 != 'n/a':
         bar_width = 0.2
     else :
         bar_width = 0.35
-    
-
-    opacity = 0.95
-         
-    color_list = ['salmon','teal','red','aqua']
-     
+    opacity = 0.95        
     rects1 = plt.bar(index, Array1, bar_width,
                      alpha=opacity,
                      color='salmon',
-                     label=labelA1)
-  
+                     label=labelA1) 
     if Array2 != 'n/a':
         rects2 = plt.bar(index + bar_width, Array2, bar_width,
                          alpha=opacity,
                          color='teal',
-                         label=labelA2)
-    
-    
+                         label=labelA2) 
     if Array3 != 'n/a':
         rects3 = plt.bar(index + 2*bar_width, Array3, bar_width,
                          alpha=opacity,
@@ -365,29 +342,26 @@ def generate_barplot(Array1,Array2,Array3,Array4,title,xlabel,ylabel,label_list,
                          alpha=opacity,
                          color='aqua',
                          label=labelA4)     
-
-
-     
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
-    
-    
     plt.xticks(index + bar_width, label_list)
-    plt.legend()
-     
+    plt.legend()  
     plt.tight_layout()
     plt.show()
+ 
     
 #fucntion that returns dndt for rates inside the fire perimeter
 def model_inside(y,t,k):
     dndt = k
     return dndt
 
+
 #function that returns dndt for rates outside the fire perimeter
 def model_outside(y,t,k):
     dndt = k
     return dndt
+
 
 def relative_N(List1,List2,labels_list):
     
@@ -395,6 +369,7 @@ def relative_N(List1,List2,labels_list):
        return print('for site {} the nitrogen decreased over an eight year period from {} to {}'.format(labels_list,'summer','summer'))
     else:
        return  print('for site {} the nitrogen increased over an eight year period frin {} to {}'.format(labels_list,'summer','summer'))
+
 
 def plot(t,n1,n2,titles,ULB,Final_soilweights):
         plt.plot(t,n1,'b-',linewidth=2,label='k=N_burn_max')
@@ -407,6 +382,7 @@ def plot(t,n1,n2,titles,ULB,Final_soilweights):
 #        plt.xlabel('time')
 #        plt.ylabel('N/m^2')
         plt.show()
+
         
 def weighted_mean(values,weights):
     weighted_value = 0
@@ -416,15 +392,48 @@ def weighted_mean(values,weights):
         weight_sum = weight_sum + weights[i]
     
     final = weighted_value/weight_sum
-    print('final is')
     return final
+
+
+def comb(array_N_input,array_N_output,label):
+        
+        complete = []
+        flab = []
+        combos = itertools.product(array_N_input,array_N_output)
+
+        for combo in combos: 
+            complete = [combo] + complete
+            flab = [label] + flab
+     
+#        print('This is the complete list of combinations for site {}'.format(label))
+#        print(complete)
+#        print(len(complete))
+        
+        return complete,flab
+ 
+    
+def iterate_parameters(complete,t,N_Final,y0,label):
+    '''This functions takes in different iterations of inputs and outputs and returns a list list of future inputs 
+    to use as parameters in the ODE'''
+    future_input = []
+    target_rate =  (N_Final - y0) / (t[len(t)-1] - t[0]) 
+    epsillon = 0
+
+    for i in range (len(complete)):
+        sum_list = sum(complete[i])
+        indiv_list = complete[i]
+        if abs(sum_list - target_rate) < epsillon:
+            print('the minimum epsillon needed is {} for site{}'.format(epsillon,label[0]))
+            print('N input is contributing {} and N output is contributing {} for site {}'.format(indiv_list[0],indiv_list[1],label[0]))
+            future_input = future_input + [indiv_list[0],indiv_list[1]]
+        else : epsillon += 100
+    return future_input
         
 
-def main():
+def main(): 
     #Find the upper and lower bounds for erosion of soil
     if False:
         #If True then the two most frequent erosional values are found and the larger value is used for the upperbound and the smaller value is used for the lowerbound
-      
         #upper/lower bound for inside the fire
         call = most_common(IFE)
         newlist = []
@@ -462,19 +471,22 @@ def main():
         UBEO = max(OFE)
         LBEO = min(OFE)
     
-    #Compare intial and final values --Summer-- nitrogen using barplot.
-    generate_barplot(IBS,FBS,FBSW_filled,'n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
-
- 
-    #Compare final and final values --Summer-- and --Winter-- nitrogen using barplot
-    generate_barplot(FBSW_filled,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Winter '17","Summer '17","n/a",'n/a')
+    if False:
+        ## If true  the following barplots are generated:
+        
+        #Compare intial and final values --Summer-- nitrogen using barplot.
+        generate_barplot(IBS,FBS,FBSW_filled,'n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
     
-    #Compare ash and intial --Summer-
-    generate_barplot(IBS,IACG_filled,IACW_filled,IACB_filled,'nitrogen in soil and ash','site','n wt%',IFBS_labels,"Summer '09","Grey ash","White ash","Black ash")    
-  
-    generate_barplot(IBS,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
+        #Compare final and final values --Summer-- and --Winter-- nitrogen using barplot
+        generate_barplot(FBSW_filled,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Winter '17","Summer '17","n/a",'n/a')
+        
+        #Compare ash and intial --Summer-
+        generate_barplot(IBS,IACG_filled,IACW_filled,IACB_filled,'nitrogen in soil and ash','site','n wt%',IFBS_labels,"Summer '09","Grey ash","White ash","Black ash")    
+      
+#        generate_barplot(IBS,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
 
     firepoints = []
+
 #    #control
 #    control1 = weighted_mean(Res_values_NH4_c,ResFix_weights)
 #    control2 = weighted_mean(Fix_values_NH4_c,ResFix_weights)
@@ -509,114 +521,56 @@ def main():
 #    maxcontrol = max(controlpoints)
 #    mincontrol = min(controlpoints)
 
-    if True:
+    if False:
+        ## If true then a function is called that tells the user whether or not nitrogen has increased between the two sampling periods of the fire
         for i in range(len(IFBS_labels)):
             call = relative_N(IBS[i],FBS[i],IFBS_labels[i])
     
-    
-        for i in range(len(IBS)):
-            
-            #nitrogen export due to erosion outside fire(mg/m^2/yr)
-            nf_erosion_L = -(.0005 * 100000 * FBS[i]/100)
-            nf_erosion_H = -(107 * 100000 * FBS[i]/100)
+
+    for i in range(len(IBS)):
         
-         
-            Intial_weightpercent = IBS[i]
-            Final_weightpercent_summer = FBS[i]
-    #        Final_weightpercent_winter = FBSW[i]
+        #nitrogen export due to erosion outside fire(mg/m^2/yr)
+        nf_erosion_L = -(.0005 * 100000 * FBS[i]/100)
+        nf_erosion_H = -(107 * 100000 * FBS[i]/100)
     
+        Intial_weightpercent = IBS[i]
+        Final_weightpercent_summer = FBS[i]
+#        Final_weightpercent_winter = FBSW[i]
+
+        #intial conditions 
+        Intial_soilweightU = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_UB
+        Intial_soilweightL = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_LB
     
-            #intial conditions 
-            Intial_soilweightU = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_UB
-            
-            print((density_soil * depth_sampled * area_sampled ) * Intial_weightpercent)
-            Intial_soilweightL = ( density_soil * depth_sampled * area_sampled ) * Intial_weightpercent + Ash_LB
-    
-            
-            #final conditions
-            Final_soilweightS =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_summer
-    #        Final_soilweightW =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_winter
-            
-            
-            #times points 
-            t = np.linspace(0,8)
-            
-            #Calculate upper and lower bounds :
-            Nf_burn_min = N_dep_L + n_rate_final_L + + nf_fixation_L + nf_erosion_L  + minfire
-            Nf_burn_max = N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H  + maxfire
-            print(Nf_burn_max)
-            print(N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H)
-            
-            ##solve the ode 
-          
-            if True:
-                k = Nf_burn_max
-                n1 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
+        #final conditions
+        Final_soilweightS =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_summer
+#       Final_soilweightW =( density_soil * depth_sampled * area_sampled ) * Final_weightpercent_winter
                 
-                k = Nf_burn_min
-                n2 = odeint(model_inside,Intial_soilweightU,t,args=(k,))
-                
-                model_plots = plot(t,n1,n2,IFBS_labels[i],'upperbound',Final_soilweightS)
-                
-                k = Nf_burn_max
-                n3 = odeint(model_outside,Intial_soilweightL,t,args=(k,))
-                
-                k = Nf_burn_min
-                n4 = odeint(model_outside,Intial_soilweightL,t,args=(k,))
-                
-                model_plots = plot(t,n1,n2,IFBS_labels[i],'lowerbound',Final_soilweightS)
-    
+        #times points 
+        t = np.linspace(0,8)
         
-        #    call = plot(t,n1,n2,Final_soilweightS)
-        #    plt.plot(7,Final_soilweightW,'ro')
-    
+        #Calculate upper and lower bounds :
+        Nf_burn_min = N_dep_L + n_rate_final_L + + nf_fixation_L + nf_erosion_L  + minfire
+        Nf_burn_max = N_dep_H + n_rate_final_H + + nf_fixation_H + nf_erosion_H  + maxfire
+       
+        #input parameters
+        N_input_L = N_dep_L + n_rate_final_L + nf_fixation_L
+        N_input_H = N_dep_H + n_rate_final_H + nf_fixation_H
 
-
-
-
-
+        
+        #output parameters
+        N_output_L = nf_erosion_L + minfire 
+        N_output_H = nf_erosion_H + maxfire
+        
+        flabs_list = []
+        array_N_output = np.linspace(N_output_H,N_output_L,num = 5)
+        array_N_input = np.linspace(N_input_H,N_input_L,num = 5)
+        IFBS_label = IFBS_labels[i]
+        combinations,flabs = comb(array_N_input,array_N_output,IFBS_label)
+#        print(flabs)
+#        print('went thru call')
+        call = iterate_parameters(combinations,t,Final_soilweightS,Intial_soilweightU,flabs)
 
 if  __name__ == "__main__":
     main()
 
 
-
-
-##combos = product(array_N_dep,array_N_rain)
-#
-#   
-##def iterate_parameters(array_N_dep,array_N_rain):
-##    """ """
-##    complete = []
-##    future_input = []
-##    
-##    for combo in combos: 
-##        complete = [combo] + complete
-##    
-##    for i in range (len(complete)):
-##        sum_list = sum(complete[i])
-##        indiv_list = complete[i]
-##        if sum_list == 15:
-##            print('N deposition is contributing {} and N due to rain fall is contributing {}'.format(indiv_list[0],indiv_list[1]))
-##            future_input = future_input + [indiv_list[0],indiv_list[1]]
-##    return future_input
-##
-#
-
-#
-
-#def plot(t,n1,n2,finalS):
-#    plt.plot(t,n1,'r-',linewidth=2,label='k=N_burn_max')
-#    plt.plot(t,n2,'r--',linewidth=2,label='k=N_burn_min')
-#    plt.plot(8,Final_soilweightS,'ro')
-#    plt.show()
-
-#
-
-#    ###MAIN
-
-#
-
-###plt.plot(t,n3,'b-',linewidth=2,label='k=N_burn_max')
-###plt.plot(t,n4,'b--',linewidth=2,label='k=N_burn_min')
-##
