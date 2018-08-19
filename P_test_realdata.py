@@ -257,8 +257,9 @@ nf_fixation_H = 4000
 Ash_LB = 2100
 Ash_UB = 5800
 
-'''N leaching'''
-
+'''N leaching mg/m^2/day'''
+#http://80.24.165.149/webproduccion/PDFs/01ART05.PDF
+#units converted in def main
 ResFix_weights = np.array([37,77,136,169])
 Sed_weights = np.array([56,115,148])
 
@@ -364,9 +365,9 @@ def model_outside(y,t,k):
 def relative_N(List1,List2,labels_list,burn,finaltime):
     
     if List1 > List2: 
-       return print('for {} site {} the nitrogen decreased over an eight year period from {} to {}'.format(labels_list,burn,'summer',finaltime))
+       return print('for {} site {} the nitrogen decreased over an eight year period from {} to {}'.format(labels_list,burn,'summer',finaltime)),0
     else:
-       return  print('for {} site {} the nitrogen increased over an eight year period frin {} to {}'.format(labels_list,burn,'summer',finaltime))
+       return  print('for {} site {} the nitrogen increased over an eight year period frin {} to {}'.format(labels_list,burn,'summer',finaltime)),1
 
 def plot(t,n1,n2,n3,n4,titles,ULB,Final_soilweights,Final_soilweightW):
        
@@ -453,6 +454,9 @@ def main():
     metric_sum = np.array([])
     metric_wint =  np.array([])
     metric_control = np.array([])
+    relNs = []  
+    relNw = []
+    relNc = []
     
     
     #Find the upper and lower bounds for erosion of soil
@@ -516,16 +520,16 @@ def main():
         ## If true  the following barplots are generated:
         
         #Compare intial and final values --Summer-- nitrogen using barplot.
-        generate_barplot(IBS,FBS,FBSW_filled,'n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
+        generate_barplot(IBS,FBS,FBSW_filled,'n/a','intial and final values for nitorgen in soil','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
     
         #Compare final and final values --Summer-- and --Winter-- nitrogen using barplot
-        generate_barplot(FBSW_filled,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Winter '17","Summer '17","n/a",'n/a')
+        generate_barplot(FBSW_filled,FBS,'n/a','n/a','seasonal variation for nitrogen in soil','site','n wt%',IFBS_labels,"Winter '17","Summer '17","n/a",'n/a')
         
         #Compare ash and intial --Summer--
         generate_barplot(IBS,IACG_filled,IACW_filled,IACB_filled,'nitrogen in soil and ash','site','n wt%',IFBS_labels,"Summer '09","Grey ash","White ash","Black ash")    
         
         #Compares intial and final --Summer-- points
-        generate_barplot(IBS,FBS,'n/a','n/a','nitrogen v. time','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
+        generate_barplot(IBS,FBS,'n/a','n/a','intial and final values for nitorgen in soil','site','n wt%',IFBS_labels,"Summer '09","Summer '17","Winter '17",'n/a')
 
     
     ##Manipulated data for leaching:
@@ -580,20 +584,28 @@ def main():
     maxcontrolleach = maxcontrolNH4 + maxcontrolNO3
     mincontrolleach = mincontrolNH4 + mincontrolNO3
    
+
     if False:
         #if true then a function is called that tells the user whether or not nitrogen has increased between the two sampling periods of the fire for --Summer-- and --Winter-- respectively 
         for i in range(len(IFBS_labels)):
             call = relative_N(IBS[i],FBS[i],IFBS_labels[i],'burn','summer')
             if IBS[i] != 0:
-                call = relative_N(IBS[i],FBSW_filled[i],IFBS_labels[i],'burn','winter')
+                call,number = relative_N(IBS[i],FBSW_filled[i],IFBS_labels[i],'burn','winter')
+                relNw = np.append(relNw,number)
+        sum_relNw = (sum(relNw)/len(relNw)) * 100
+        print('nitrogen has increased at {}% of winter sites sampled'.format( sum_relNw))
+                
                         
     if False: 
         #if true then a function is called that tells the user whether or not nitrogen has increased between the two sampling periods of the control for --Summer-- 
         for j in range(len(IFUBS_labels)):
-            call = relative_N(IUBS[j],FUBS[j],IFUBS_labels[j],'control','summer')
+            call,number = relative_N(IUBS[j],FUBS[j],IFUBS_labels[j],'control','summer')
+            relNs = np.append(relNs,number)
+        sum_relNs = (sum(relNs)/len(relNs)) * 100
+        print('nitrogen has increased at {}% of winter sites sampled'.format( sum_relNs))
             
 
-    if False :
+    if True :
         ##This block of code analyzes the control samples
         for j in range(len(IFUBS_labels)):
             
@@ -661,7 +673,7 @@ def main():
                 Nf_control_min = N_dep_L + n_rate_final_L + nf_fixation_L + no_erosion_L + mincontrolleach
                 Nf_control_max = N_dep_H + n_rate_final_H + nf_fixation_H + no_erosion_H + maxcontrolleach
                 
-                if True:
+                if False:
                     #if there is a problem one can view the values of the individual parameters and total inputs and outputs
                     if False:
                         print('N_dep_L is {}'.format(N_dep_L))
@@ -704,16 +716,18 @@ def main():
                     #plots the differential equations         
                     model_plotsU = plot(t,c1U,c2U,'n/a','n/a',IFBS_labels[j],'upperbound',Final_soilweightS_control,'n/a')
                     model_plotsL = plot(t,c1L,c2L,'n/a','n/a',IFBS_labels[j],'lowerbound',Final_soilweightS_control,'n/a')
-              
-            if True:
+            
+            met = True
+            if met:
                 #Metric that shows percentage of point between the upper and lower bound
                  metricc = metric(list(c2U),list(c1U),Final_soilweightS_control,list(np.linspace(0,8)),8)
                  metric_control = np.append(metric_control,metricc)
         
-        #prints the percentage of points that are inbetween the upper and lower bounds         
-        sum_controlpoints = (sum(metric_control)/len(metric_control)) * 100
-        print('The percentage of points that is exist between the upper and lower control bounds is {}%'.format(sum_controlpoints))
-    
+        if met:
+            #prints the percentage of points that are inbetween the upper and lower bounds         
+            sum_controlpoints = (sum(metric_control)/len(metric_control)) * 100
+            print('The percentage of points that is exist between the upper and lower control bounds is {}%'.format(sum_controlpoints))
+        
     
     if False:
         for i in range(len(IBS)):    
