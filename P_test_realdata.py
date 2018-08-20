@@ -241,7 +241,7 @@ N_rain_rate_H = N_rain_rate_NH4_H + N_rain_rate_NO3_H
 # lower bound used for rain from 09/02/2018 to 8/20/2018 located at 34.4938	-118.2713 near Acton, CA from file "1435436 (ACTON USED)" on github, from NCDC CDO, Order #1435436 (Custom GHCN-Daily CSV) -- link to database https://www.ncdc.noaa.gov/cdo-web/
 rainfall_rate_H = 676.0237095664147 
 #rainfall_rate_L = 187.96
-rainfall_rate_L = 351.666477
+rainfall_rate_L = 227.7951807
 
 '''Rate rainfall (mg/m^2/year)'''
 n_rate_final_L = rainfall_rate_L * N_rain_rate_L 
