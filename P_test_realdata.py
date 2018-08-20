@@ -237,10 +237,11 @@ N_rain_rate_H = N_rain_rate_NH4_H + N_rain_rate_NO3_H
 #source:
 #note : the upperbound is calculated in the program rain_calc.py...
 # ...which can be found in the GITHUB repository https://github.com/pshankinclarke/StationFire
-# LOWER BOUND FROM https://www.usclimatedata.com/climate/palmdale/california/united-states/usca0829 from 1981-2010 MAYBE NEED BETTER DATA
-
+# not used LOWER BOUND FROM https://www.usclimatedata.com/climate/palmdale/california/united-states/usca0829 from 1981-2010 MAYBE NEED BETTER DATA
+# lower bound used for rain from 09/02/2018 to 8/20/2018 located at 34.4938	-118.2713 near Acton, CA from file "1435436 (ACTON USED)" on github, from NCDC CDO, Order #1435436 (Custom GHCN-Daily CSV) -- link to database https://www.ncdc.noaa.gov/cdo-web/
 rainfall_rate_H = 676.0237095664147 
-rainfall_rate_L = 187.96
+#rainfall_rate_L = 187.96
+rainfall_rate_L = 351.666477
 
 '''Rate rainfall (mg/m^2/year)'''
 n_rate_final_L = rainfall_rate_L * N_rain_rate_L 
