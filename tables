@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import plotly.plotly as py
+import plotly.graph_objs as go
+
+headerColor = 'grey'
+rowEvenColor = 'lightgrey'
+rowOddColor = 'white'
+
+trace0 = go.Table(
+  header = dict(
+    values = [['Topography'],
+                  ['Vegetation'],
+                  ['Surrounding Land Use'],
+                  ['Geology'],
+                  ['Elevation']],
+    line = dict(color = '#506784'),
+    fill = dict(color = headerColor),
+    align = ['left','center'],
+    font = dict(color = 'white', size = 12)
+  ),
+  cells = dict(
+    values = [
+      [[ 'Topography',  'Vegetation', 'Surrounding Land Use','Geology','Elevation','Soil']],
+      [[1200000, 20000, 80000, 2000, 12120000]],
+      [[1300000, 20000, 70000, 2000, 130902000]],
+      [[1300000, 20000, 120000, 2000, 131222000]],
+      [[1400000, 20000, 90000, 2000, 14102000]]],
+    line = dict(color = '#506784'),
+    fill = dict(color = [rowOddColor,rowEvenColor,rowOddColor, rowEvenColor,rowOddColor]),
+    align = ['left', 'center'],
+    font = dict(color = '#506784', size = 11)
+    ))
+
+data = [trace0]
+py.plot(data, filename = 'line', auto_open=True)
